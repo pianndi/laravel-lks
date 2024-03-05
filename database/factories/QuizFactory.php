@@ -14,7 +14,9 @@ class QuizFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'title'=>$this->faker->sentence(),
+            'category_id'=>mt_rand(1,3),
+            'random'=>mt_rand(0,1),
         ];
     }
 }
