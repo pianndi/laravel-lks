@@ -20,3 +20,5 @@ Route::get('/', function () {
 
 Route::get('/quiz',[QuizController::class,'index']);
 Route::post('/quiz',[QuizController::class,'post']);
+Route::get('/quiz/{quiz}',[QuizController::class,'show']);
+Route::post('/quiz/{quiz}',[QuizController::class,'answer']);
