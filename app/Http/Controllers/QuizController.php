@@ -10,33 +10,41 @@ use Illuminate\Http\Request;
 class QuizController extends Controller
 {
     public function index(Request $request){
-        $quizzes = Quiz::latest();
+        if ($request->query('sort')=='oldest'){
+            $quizzes = Quiz::oldest();
+
+        }else {
+            $quizzes = Quiz::latest();
+
+        }
+        $search = $request->query('search');
+        if ($search){
+            $quizzes->where('title','like','%'.$search.'%');
+        }
         return view('quiz',['data'=>$quizzes->paginate(5)->withQueryString()]);
     }
     public function show(Quiz $quiz){
-        $question = Question::where('quiz_id',$quiz->id)->paginate(1)->withQueryString();
-        $answer = Attempt::firstWhere('question_id',$question[0]->id);
+        $question = Question::where('quiz_id',$quiz->id);
+        if ($quiz->random)$question->inRandomOrder();
         return view('question',[
             'title'=>$quiz->title,
-            'data'=>$question,
-            'answer'=>$answer?$answer->answer:'',
+            'data'=>$question->get(),
         ]);
     }
-    public function answer(Quiz $quiz){
-        $answer = request('answer');
-        $question_id = request('question_id');
-        $attempt = Attempt::create([    
-            'user_id'=>1,
-            'question_id'=>$question_id,
-            'answer'=> $answer,
+    public function answer(Request $request, Quiz $quiz) {
+        $question = Question::where('quiz_id',$quiz->id);
+        $answers = $request->input('answer',[]);
+        $ids = collect($answers)->pluck('id');
+        $answer = collect($answers)->pluck('answer');
+        $benar = Question::whereIn('id',$ids)->whereIn('answer',$answer)->get();
+        $score = round(100/$question->count()*$benar->count());
+        Attempt::create([
+            'user_id'=>auth()->user()->id,
+            'quiz_id'=>$quiz->id,
+            'score'=>$score,
         ]);
-        $answer = $attempt->answer;
-        $question = Question::where('quiz_id',$quiz->id)->paginate(1)->withQueryString();
-        return view('question',[
-            'title'=>$quiz->title,
-            'data'=>$question,
-            'answer'=>$answer
-        ]);
+        return redirect('quiz');
+        
     }
     public function post(Request $request){
         return json_encode($request->input());

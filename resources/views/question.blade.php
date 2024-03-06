@@ -1,40 +1,45 @@
 @extends('layouts.main')
 
 @section('container')
-<h2>{{ $data->currentPage() }}. {{ $data[0]->title }}</h2>
+<script>
+    const data = {{json_encode($data)}};
+</script>
 <form action='{{request()->getRequestUri()}}' method='post'>
     @csrf
-    <input type="hidden" name="question_id" value='{{ $data[0]->id}}'>
+@foreach($data as $d)
+    <h2>{{ $loop->index +1}}. {{ $d->title }}</h2>
+    <input type="hidden" name="answer[{{$loop->index}}][id]" value="{{$d->id}}">
     <p>
         <label >
-            <input type="radio" name="answer" value='1' @if( $answer == '1') checked @endif required onchange='this.form.submit()'>
-            A. {{ $data[0]->choice_1 }}
+            <input type="radio" name="answer[{{$loop->index}}][answer]" value='1' required >
+            A. {{ $d->choice_1 }}
         </label>
     </p>
     <p>
         <label >
-            <input type="radio" name="answer" value='2' @if( $answer == '2') checked @endif required onchange='this.form.submit()'>
-            B. {{ $data[0]->choice_2 }}
+            <input type="radio" name="answer[{{$loop->index}}][answer]" value='2' required >
+            B. {{ $d->choice_2 }}
         </label>
     </p>
     <p>
         <label >
-            <input type="radio" name="answer" value='3' @if( $answer == '3') checked @endif required onchange='this.form.submit()'>
-            C. {{ $data[0]->choice_3 }}
+            <input type="radio" name="answer[{{$loop->index}}][answer]" value='3' required >
+            C. {{ $d->choice_3 }}
         </label>
     </p>
     <p>
         <label >
-            <input type="radio" name="answer" value='4' @if( $answer == '4') checked @endif required onchange='this.form.submit()'>
-            D. {{ $data[0]->choice_4 }}
+            <input type="radio" name="answer[{{$loop->index}}][answer]" value='4' required >
+            D. {{ $d->choice_4 }}
         </label>
     </p>
     <p>
         <label >
-            <input type="radio" name="answer" value='5' @if( $answer == '5') checked @endif required onchange='this.form.submit()'>
-            E. {{ $data[0]->choice_5 }}
+            <input type="radio" name="answer[{{$loop->index}}][answer]" value='5' required >
+            E. {{ $d->choice_5 }}
         </label>
     </p>
+    @endforeach
+    <button type="submit">Simpan</button>
 </form>
-{{$data->links()}}
 @endsection
